@@ -21,6 +21,32 @@ df = pd.read_csv("SUPERLAST.csv")
 
 df = df[["date", "Adj Close",'gtrends','Comments_int','tweet_num','meme_Reddit']]
 
+#Step 1
+#figure 1
+plt.figure(figsize=(10, 8))
+plt.scatter(df['meme_Reddit'],df['Adj Close'])
+plt.xticks(rotation=45)
+plt.xlabel(u'meme_Reddit', fontsize = 20)
+plt.ylabel(u'Adj Close', fontsize = 20)
+plt.show()
+
+#figure 2
+plt.figure(figsize=(10, 8))
+plt.scatter(df['tweet_num'],df['Adj Close'])
+plt.xticks(rotation=45)
+plt.xlabel(u'tweet_num', fontsize = 20)
+plt.ylabel(u'Adj Close', fontsize = 20)
+plt.show()
+
+#figure 3
+plt.figure(figsize=(10, 8))
+plt.scatter(df['Comments_int'],df['Adj Close'])
+plt.xticks(rotation=45)
+plt.xlabel(u'Comments_int', fontsize = 20)
+plt.ylabel(u'Adj Close', fontsize = 20)
+plt.show()
+
+
 #Step 2
 
 
@@ -41,6 +67,14 @@ for i in df.columns[1:]:
 
 #Step 3
 
+
+
+print(min(df['gtrends']), min(df['Adj Close']), min(df['Comments_int']), min(df['tweet_num']), min(df['meme_Reddit']))
+print(max(df['gtrends']), max(df['Adj Close']), max(df['Comments_int']), max(df['tweet_num']), max(df['meme_Reddit']))
+print(df['gtrends'].median(), df['Adj Close'].median(), df['Comments_int'].median(), df['tweet_num'].median(),df['meme_Reddit'].median())
+print(np.quantile(df['gtrends'], 0.25), np.quantile(df['Adj Close'], 0.25), np.quantile(df['Comments_int'], 0.25), np.quantile(df['tweet_num'], 0.25),  np.quantile(df['meme_Reddit'], 0.25))
+print(np.quantile(df['gtrends'], 0.75), np.quantile(df['Adj Close'], 0.75), np.quantile(df['Comments_int'], 0.75), np.quantile(df['tweet_num'], 0.75),  np.quantile(df['meme_Reddit'], 0.75))
+
 plt.boxplot(df.gtrends)
 for i in df.columns[2:12]:
     plt.boxplot(df[str(i)])
@@ -52,7 +86,7 @@ for i in df.columns[2:12]:
 dist_name = 'norm'
 data = df.gtrends
 def get_best_distribution(data):
-    dist_names = ["norm", "exponweib", "weibull_max", "weibull_min", "pareto", "genextreme"]
+    dist_names = ["norm", "exponweib", "weibull_max", "weibull_min", "pareto", "genextreme", "exponpow", "gamma"]
     dist_results = []
     params = {}
     for dist_name in dist_names:
@@ -76,7 +110,12 @@ def get_best_distribution(data):
     print(params)
     return best_dist, best_p, params[best_dist]
 
+data_names = [df.gtrends, df.Comments_int, df.tweet_num, df.meme_Reddit, df['Adj Close']]
 
+for data in data_names:
+  print(data.name)
+  get_best_distribution(data)
+  print(' ')
 
 
 # Estimating wil MLE
