@@ -19,6 +19,11 @@ from scipy import stats
 
 df = pd.read_csv("SUPERLAST.csv")
 
+Q1 = df.quantile(0.2)
+Q3 = df.quantile(0.8)
+IQR = Q3 - Q1
+df = df[~((df > (Q3 + 0.4 * IQR))).any(axis=1)]
+
 df = df[["date", "Adj Close",'gtrends','Comments_int','tweet_num','meme_Twitter','meme_Reddit']]
 df = df.rename({'Adj Close': 'Adj_Close'}, axis=1)
 
@@ -255,11 +260,36 @@ pylab.show()
 # Step 6
 
 #kolmogorov test
-stats.kstest(df.gtrends, np.random.normal(1, 1, 1000)  ,alternative='two-sided', mode='auto')
-stats.kstest(df.gtrends.tolist(), np.random.normal(0.8758370472673307, 2.5450828743821496, 1000),alternative='two-sided', mode='auto')
+#stats.kstest(df.gtrends, np.random.normal(1, 1, 1000)  ,alternative='two-sided', mode='auto')
+#stats.kstest(df.gtrends.tolist(), np.random.normal(0.8758370472673307, 2.5450828743821496, 1000),alternative='two-sided', mode='auto')
 #Chi-Squared
 
-chi2 = scipy.stats.chisquare(df.gtrends)
+#chi2 = scipy.stats.chisquare(df.gtrends)
+
+#dict with fits of distributions
+dist_name_to_func = {
+    "norm" : (lambda column: scipy.stats.norm.fit(column)),
+    "exponnorm" : (lambda column: scipy.stats.exponnorm.fit(column)),
+    "genextreme" : (lambda column: scipy.stats.genextreme.fit(column)),
+    "expon" : (lambda column: scipy.stats.expon.fit(column)),
+    "chi2" : (lambda column: scipy.stats.chi2.fit(column)),
+    "lognorm" : (lambda column: scipy.stats.lognorm.fit(column)),
+    "gamma" : (lambda column: scipy.stats.gamma.fit(column)),
+    "exponweib" : (lambda column: scipy.stats.exponweib.fit(column)),
+    "weibull_max" : (lambda column: scipy.stats.weibull_max.fit(column)),
+    "weibull_min" : (lambda column: scipy.stats.weibull_min.fit(column)),
+    "pareto" : (lambda column: scipy.stats.pareto.fit(column))
+
+}
+
+#return parameters
+def parameters(column, dist):
+  return dist_name_to_func[dist](column)
+
+#ks test 
+for i in df.columns[1:12]:
+    print(str(i) + "-" + str(scipy.stats.kstest(df[str(i)], get_best_distribution(df[str(i)])[0], parameters(df[str(i)], get_best_distribution(df[str(i)])[0]))))
+    #print(get_best_distribution(df[str(i)])[0])
 
 #Wilcoxon rank-sum
 scipy.stats.ranksums(df.gtrends, np.random.normal(13, 12, 1000))
