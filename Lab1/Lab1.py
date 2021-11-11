@@ -251,6 +251,38 @@ plt.legend()
 stats.probplot(df.gtrends, dist="norm", plot=pylab)
 pylab.show()
 
+#make some dict with ppf
+dist_name_to_func_ppf = {
+    "norm" : (lambda i, j : scipy.stats.norm.ppf(i, *j)),
+    "exponnorm" : (lambda i, j: scipy.stats.exponnorm.ppf(i, *j)),
+    "genextreme" : (lambda i, j: scipy.stats.genextreme.ppf(i, *j)),
+    "expon" : (lambda i, j: scipy.stats.expon.ppf(i, *j)),
+    "chi2" : (lambda i, j: scipy.stats.chi2.ppf(i, *j)),
+    "lognorm" : (lambda i, j: scipy.stats.lognorm.ppf(i, *j)),
+    "gamma" : (lambda i, j: scipy.stats.gamma.ppf(i, *j)),
+    "exponweib" : (lambda i, j: scipy.stats.exponweib.ppf(i, *j)),
+    "weibull_max" : (lambda i, j: scipy.stats.weibull_max.ppf(i, *j)),
+    "weibull_min" : (lambda i, j: scipy.stats.weibull_min.ppf(i, *j)),
+    "pareto" : (lambda i, j: scipy.stats.pareto.ppf(i, *j))
+
+}
+
+#graph QQ
+for i in df.columns[1:]:
+    x = np.arange(min(df[str(i)]), max(df[str(i)]), 1)
+    params = parameters(df[str(i)], get_best_distribution(df[str(i)])[0])
+    # Calculation of quantiles
+    percs = np.linspace(0, 100, 101)
+    qn_first = np.percentile(df[str(i)], percs)
+    qn_norm = dist_name_to_func_ppf[get_best_distribution(df[str(i)])[0]](percs/100.0, params)
+    plt.figure(figsize=(10, 10))
+    plt.plot(qn_first, qn_norm, ls="", marker="o", markersize=6)
+    plt.plot(x, x, color="k", ls="--")
+    plt.title(str(i)+ " " + "QQ plot" )
+    plt.xlabel(f'Empirical distribution')
+    plt.ylabel('Theoretical distribution')
+    plt.show()
+
 
 # Step 6
 
